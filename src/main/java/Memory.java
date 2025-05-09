@@ -19,10 +19,10 @@ public class Memory {
         if (address < 0 || address + 3 >= mem.length || address % 4 != 0) {
             throw new IllegalArgumentException("Invalid address: " + address);
         }
-        mem[address] = (byte)(value & 0xFF);
-        mem[address + 1] = (byte)((value >> 8) & 0xFF);
-        mem[address + 2] = (byte)((value >> 16) & 0xFF);
-        mem[address + 3] = (byte)((value >> 24) & 0xFF);
+        mem[address] = (byte) (value & 0xFF);
+        mem[address + 1] = (byte) ((value >> 8) & 0xFF);
+        mem[address + 2] = (byte) ((value >> 16) & 0xFF);
+        mem[address + 3] = (byte) ((value >> 24) & 0xFF);
     }
 
     public byte loadByte(int address) {
@@ -34,11 +34,12 @@ public class Memory {
     }
 
     public short loadHalf(int address) {
-        return (short)((mem[address] & 0xFF) | (mem[address + 1] << 8));
+        return (short) ((mem[address] & 0xFF) | (mem[address + 1] << 8));
     }
+
     public void storeHalf(int address, short value) {
-        mem[address] = (byte)(value & 0xFF);
-        mem[address + 1] = (byte)((value >> 8) & 0xFF);
+        mem[address] = (byte) (value & 0xFF);
+        mem[address + 1] = (byte) ((value >> 8) & 0xFF);
     }
 
 

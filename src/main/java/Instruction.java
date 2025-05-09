@@ -1,16 +1,9 @@
-
-
 public class Instruction {
-
-    public enum Type {
-        R_TYPE,I_TYPE,S_TYPE,B_TYPE,U_TYPE,J_TYPE
-    }
 
     public Operand op;
     public Type type;
     public int rd, funct3, rs1, rs2, funct7, imm;
-
-    public Instruction(Operand op, Type type, int rd, int funct3, int rs1, int rs2, int funct7, int imm ) {
+    public Instruction(Operand op, Type type, int rd, int funct3, int rs1, int rs2, int funct7, int imm) {
         this.op = op;
         this.type = type;
         this.rd = rd;
@@ -54,7 +47,7 @@ public class Instruction {
                 return new Instruction(op, Type.R_TYPE, rd, funct3, rs1, rs2, funct7, imm);
             case IType.COMPI: // I-type of execution
                 imm = (instructionWord >> 20) & 0xfff;
-                op = switch(funct3) {
+                op = switch (funct3) {
                     case 0x0 -> Operand.ADDI;
                     case 0x2 -> Operand.SLTI;
                     case 0x3 -> Operand.SLTIU;
@@ -67,7 +60,7 @@ public class Instruction {
                 if (funct3 == 0x1 && imm11_5 == 0x0) {
                     op = Operand.SLLI;
                 } else if (funct3 == 0x5) {
-                    op = switch(imm11_5) {
+                    op = switch (imm11_5) {
                         case 0x0 -> Operand.SRLI;
                         case 0x20 -> Operand.SRAI;
                         default -> null;
@@ -75,7 +68,7 @@ public class Instruction {
                 } else {
                     imm = signExtend(imm, 12);
                 }
-                return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0,  0, imm);
+                return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
             case IType.LUI: // LUI U-type of execution
                 imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.LUI, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
@@ -85,7 +78,7 @@ public class Instruction {
             case IType.LD: // I-type of memory access
                 imm = (instructionWord >> 20) & 0xfff;
                 imm = signExtend(imm, 12);
-                op = switch(funct3) {
+                op = switch (funct3) {
                     case 0x0 -> Operand.LB;
                     case 0x4 -> Operand.LBU;
                     case 0x1 -> Operand.LH;
@@ -99,7 +92,7 @@ public class Instruction {
                 int imm4_0 = (instructionWord >> 7) & 0x1f;
                 imm = (imm11_5b << 5) | imm4_0;
                 imm = signExtend(imm, 12);
-                op = switch(funct3) {
+                op = switch (funct3) {
                     case 0x0 -> Operand.SB;
                     case 0x1 -> Operand.SH;
                     case 0x2 -> Operand.SW;
@@ -112,7 +105,7 @@ public class Instruction {
                 int imm11 = (instructionWord >> 20) & 0x1;
                 int imm19_12 = (instructionWord >> 12) & 0xff;
                 imm = (imm20 << 20) | (imm19_12 << 12) | (imm11 << 11) | (imm10_1 << 1);
-                imm = signExtend(imm,21);
+                imm = signExtend(imm, 21);
                 return new Instruction(Operand.JAL, Type.J_TYPE, rd, 0, 0, 0, 0, imm);
             case IType.JALR: // I-type of program control
                 imm = (instructionWord >> 20) & 0xfff;
@@ -128,7 +121,7 @@ public class Instruction {
                 int imm4_1 = (instructionWord >> 8) & 0xf;
                 imm = (imm12 << 12) | (imm11_b << 11) | (imm10_5 << 5) | (imm4_1 << 1);
                 imm = signExtend(imm, 13);
-                op = switch(funct3) {
+                op = switch (funct3) {
                     case 0x0 -> Operand.BEQ;
                     case 0x1 -> Operand.BNE;
                     case 0x4 -> Operand.BLT;
@@ -144,13 +137,17 @@ public class Instruction {
         }
     }
 
+    private static int signExtend(int value, int bits) {
+        int shift = 32 - bits;
+        return (value << shift) >> shift;
+    }
+
     @Override
     public String toString() {
         return String.format("%s rd=%d rs1=%d rs2=%d imm=%d", op.toString(), rd, rs1, rs2, imm);
     }
 
-    private static int signExtend(int value, int bits) {
-        int shift = 32 - bits;
-        return (value << shift) >> shift;
+    public enum Type {
+        R_TYPE, I_TYPE, S_TYPE, B_TYPE, U_TYPE, J_TYPE
     }
 }

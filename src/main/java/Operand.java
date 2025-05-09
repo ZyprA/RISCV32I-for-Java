@@ -1,14 +1,14 @@
 public enum Operand {
     ADD(IType.COMP, 0, 0x0),
-    SUB(IType.COMP,0,0x20),
-    SLT(IType.COMP,2,0x0),
-    SLTU(IType.COMP,3,0x0),
-    AND(IType.COMP,7,0x0),
-    OR(IType.COMP,6,0x0),
-    XOR(IType.COMP,4,0x0),
-    SLL(IType.COMP,1,0x0),
-    SRL(IType.COMP,5,0x0),
-    SRA(IType.COMP,5,0x20),
+    SUB(IType.COMP, 0, 0x20),
+    SLT(IType.COMP, 2, 0x0),
+    SLTU(IType.COMP, 3, 0x0),
+    AND(IType.COMP, 7, 0x0),
+    OR(IType.COMP, 6, 0x0),
+    XOR(IType.COMP, 4, 0x0),
+    SLL(IType.COMP, 1, 0x0),
+    SRL(IType.COMP, 5, 0x0),
+    SRA(IType.COMP, 5, 0x20),
     ADDI(IType.COMPI, 0, 0),
     SLTI(IType.COMPI, 2, 0),
     SLTIU(IType.COMPI, 3, 0),
@@ -18,8 +18,8 @@ public enum Operand {
     SLLI(IType.COMPI, 1, 0),
     SRLI(IType.COMPI, 5, 0),
     SRAI(IType.COMPI, 5, 0),
-    LUI(IType.LUI, 0,  0),
-    AUIPC(IType.AUIPC, 0,0),
+    LUI(IType.LUI, 0, 0),
+    AUIPC(IType.AUIPC, 0, 0),
     LB(IType.LD, 0, 0),
     LBU(IType.LD, 4, 0),
     LH(IType.LD, 1, 0),
@@ -37,9 +37,9 @@ public enum Operand {
     BGE(IType.BR, 5, 0),
     BGEU(IType.BR, 7, 0);
 
-    public int optype;
     public final int funct3;
     public final int funct7;
+    public int optype;
 
     Operand(int optype, int funct3, int funct7) {
         this.optype = optype;

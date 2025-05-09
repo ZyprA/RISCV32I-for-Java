@@ -1,4 +1,4 @@
-public class Assembler{
+public class Assembler {
     public static int ADD(int rd, int rs1, int rs2) {
         return RTYPE(Operand.ADD, rd, rs1, rs2);
     }
@@ -26,6 +26,7 @@ public class Assembler{
     public static int SLL(int rd, int rs1, int rs2) {
         return RTYPE(Operand.SLL, rd, rs1, rs2);
     }
+
     public static int SRL(int rd, int rs1, int rs2) {
         return RTYPE(Operand.SRL, rd, rs1, rs2);
     }
@@ -143,9 +144,6 @@ public class Assembler{
     }
 
 
-
-
-
     public static int RTYPE(Operand op, int rd, int rs1, int rs2) {
         return RTYPE(op.optype, rd, op.funct3, rs1, rs2, op.funct7);
     }
@@ -164,7 +162,7 @@ public class Assembler{
                 (funct3 << 12) | (rd << 7) | opcode;
     }
 
-    public static int STYPE(Operand op, int rs1,  int rs2, int imm) {
+    public static int STYPE(Operand op, int rs1, int rs2, int imm) {
         return STYPE(op.optype, op.funct3, rs1, rs2, imm);
     }
 
@@ -206,7 +204,7 @@ public class Assembler{
     }
 
     private static int UTYPE(int opcode, int rd, int imm) {
-        int imm31_12 = getBitRange(imm, 12,30);
+        int imm31_12 = getBitRange(imm, 12, 30);
 
         return (imm31_12 << 12) | (rd << 7) | opcode;
     }
