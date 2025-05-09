@@ -14,10 +14,11 @@ public class CPU {
         int rs1 = registers[instr.rs1];
         int rs2 = registers[instr.rs2];
         int imm = instr.imm;
-        int result;
+        int result = 0;
 
         // debug
-        System.out.printf("Executing at PC=0x%08X: %s\n", pc, instr);
+        System.out.printf("Executing at PC=0x%08X: %s | ", pc, instr);
+        System.out.printf("[x[%d]]=%d x[%d]=%d\n",instr.rs1,rs1,instr.rs2,rs2);
 
         switch (instr.op) {
             case ADD: result = rs1 + rs2; break;
@@ -52,12 +53,12 @@ public class CPU {
             case JAL: setRegister(instr.rd, getPC() + 4); addPC(imm);
                 return false;
             case JALR: setRegister(instr.rd, getPC() + 4); setPC((rs1 + imm) & ~1); return false;
-            case BEQ: if (rs1 == rs2) addPC(imm); return false;
-            case BNE: if (rs1 != rs2) addPC(imm); return false;
-            case BLT: if (rs1 < rs2) addPC(imm); return false;
-            case BLTU: if (Integer.compareUnsigned(rs1, rs2) < 0) addPC(imm); return false;
-            case BGE: if  (rs1 >= rs2) addPC(imm); return false;
-            case BGEU: if (Integer.compareUnsigned(rs1, rs2) >= 0) addPC(imm);return false;
+            case BEQ: if (rs1 == rs2){ addPC(imm); return false;} break;
+            case BNE: if (rs1 != rs2){ addPC(imm); return false;} break;
+            case BLT: if (rs1 < rs2){ addPC(imm); return false;} break;
+            case BLTU: if (Integer.compareUnsigned(rs1, rs2) < 0){ addPC(imm); return false;} break;
+            case BGE: if  (rs1 >= rs2) {addPC(imm); return false;} break;
+            case BGEU: if (Integer.compareUnsigned(rs1, rs2) >= 0){ addPC(imm);return false;} break;
             default:
                 throw new IllegalArgumentException("Unknown instruction: " + instr.op);
         }

@@ -30,10 +30,8 @@ public class Instruction {
         int funct7 = (instructionWord >> 25) & 0x7F;
         int imm = 0;
         Operand op = null;
-        Type32 optype = Type32.fromOpcode(opcode);
-        if (optype == null) return null;
-        switch (optype) {
-            case R_TYPE_REG: // R-type of execution
+        switch (opcode) {
+            case IType.COMP: // R-type of execution
                 if (funct7 == 0x0) {
                     op = switch (funct3) {
                         case 0x0 -> Operand.ADD;
@@ -54,7 +52,7 @@ public class Instruction {
                     };
                 }
                 return new Instruction(op, Type.R_TYPE, rd, funct3, rs1, rs2, funct7, imm);
-            case I_TYPE_IMM: // I-type of execution
+            case IType.COMPI: // I-type of execution
                 imm = (instructionWord >> 20) & 0xfff;
                 op = switch(funct3) {
                     case 0x0 -> Operand.ADDI;
@@ -74,16 +72,19 @@ public class Instruction {
                         case 0x20 -> Operand.SRAI;
                         default -> null;
                     };
+                } else {
+                    imm = signExtend(imm, 12);
                 }
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0,  0, imm);
-            case U_TYPE_LUI: // LUI U-type of execution
+            case IType.LUI: // LUI U-type of execution
                 imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.LUI, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
-            case U_TYPE_AUIPC: // AUIPC U-type of execution
+            case IType.AUIPC: // AUIPC U-type of execution
                 imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.AUIPC, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
-            case I_TYPE_MEM: // I-type of memory access
+            case IType.LD: // I-type of memory access
                 imm = (instructionWord >> 20) & 0xfff;
+                imm = signExtend(imm, 12);
                 op = switch(funct3) {
                     case 0x0 -> Operand.LB;
                     case 0x4 -> Operand.LBU;
@@ -93,10 +94,11 @@ public class Instruction {
                     default -> null;
                 };
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
-            case S_TYPE_MEM: // S-type of memory access
+            case IType.ST: // S-type of memory access
                 int imm11_5b = (instructionWord >> 20) & 0xef;
                 int imm4_0 = (instructionWord >> 7) & 0x1f;
                 imm = (imm11_5b << 5) | imm4_0;
+                imm = signExtend(imm, 12);
                 op = switch(funct3) {
                     case 0x0 -> Operand.SB;
                     case 0x1 -> Operand.SH;
@@ -104,25 +106,28 @@ public class Instruction {
                     default -> null;
                 };
                 return new Instruction(op, Type.S_TYPE, 0, funct3, rs1, rs2, 0, imm);
-            case J_TYPE_PROG: // J-type of program control
+            case IType.JAL: // J-type of program control
                 int imm20 = (instructionWord >> 31) & 0x1;
                 int imm10_1 = (instructionWord >> 21) & 0x3ff;
                 int imm11 = (instructionWord >> 20) & 0x1;
                 int imm19_12 = (instructionWord >> 12) & 0xff;
                 imm = (imm20 << 20) | (imm19_12 << 12) | (imm11 << 11) | (imm10_1 << 1);
+                imm = signExtend(imm,21);
                 return new Instruction(Operand.JAL, Type.J_TYPE, rd, 0, 0, 0, 0, imm);
-            case I_TYPE_PROG: // I-type of program control
+            case IType.JALR: // I-type of program control
                 imm = (instructionWord >> 20) & 0xfff;
+                imm = signExtend(imm, 12);
                 if (funct3 == 0x0) {
                     return new Instruction(Operand.JALR, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
                 }
                 return null;
-            case B_TYPE_PROG: // B-type of program control
+            case IType.BR: // B-type of program control
                 int imm12 = (instructionWord >> 31) & 0x1;
                 int imm11_b = (instructionWord >> 7) & 0x1;
                 int imm10_5 = (instructionWord >> 25) & 0x3f;
                 int imm4_1 = (instructionWord >> 8) & 0xf;
                 imm = (imm12 << 12) | (imm11_b << 11) | (imm10_5 << 5) | (imm4_1 << 1);
+                imm = signExtend(imm, 13);
                 op = switch(funct3) {
                     case 0x0 -> Operand.BEQ;
                     case 0x1 -> Operand.BNE;
@@ -142,5 +147,10 @@ public class Instruction {
     @Override
     public String toString() {
         return String.format("%s rd=%d rs1=%d rs2=%d imm=%d", op.toString(), rd, rs1, rs2, imm);
+    }
+
+    private static int signExtend(int value, int bits) {
+        int shift = 32 - bits;
+        return (value << shift) >> shift;
     }
 }
