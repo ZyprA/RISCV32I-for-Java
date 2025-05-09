@@ -47,9 +47,9 @@ public class CPU {
             case LH: result = memory.loadHalf(rs1 + imm); break;
             case LHU: result = memory.loadHalf(rs1 + imm) & 0xFFFF; break;
             case LW: result = memory.loadWord(rs1 + imm); break;
-            case SB: memory.storeByte(rs1 + imm, (byte) (rs2 & 0xFF)); return false;
-            case SH: memory.storeHalf(rs1 + imm, (byte) (rs2 & 0xFFFF)); return false;
-            case SW: memory.storeWord(rs1 + imm, (byte) rs2); return false;
+            case SB: memory.storeByte(rs1 + imm, (byte) (rs2 & 0xFF)); break;
+            case SH: memory.storeHalf(rs1 + imm, (byte) (rs2 & 0xFFFF)); break;
+            case SW: memory.storeWord(rs1 + imm, (byte) rs2); break;
             case JAL: setRegister(instr.rd, getPC() + 4); addPC(imm);
                 return false;
             case JALR: setRegister(instr.rd, getPC() + 4); setPC((rs1 + imm) & ~1); return false;
