@@ -1,11 +1,9 @@
+
+
 public class Instruction {
 
     public enum Type {
         R_TYPE,I_TYPE,S_TYPE,B_TYPE,U_TYPE,J_TYPE
-    }
-
-    public enum Operand {
-        ADD, SUB, SLT, SLTU, AND, OR, XOR, SLL, SRL, SRA, ADDI, SLTI, SLTIU, ANDI, ORI, XORI, SLLI, SRLI, SRAI, LUI, AUIPC, LB, LBU, LH, LHU, LW, SB, SH, SW, JAL, JALR, BEQ, BNE, BLT, BLTU, BGE, BGEU
     }
 
     public Operand op;
@@ -32,8 +30,10 @@ public class Instruction {
         int funct7 = (instructionWord >> 25) & 0x7F;
         int imm = 0;
         Operand op = null;
-        switch (opcode) {
-            case 0x33: // R-type of execution
+        Type32 optype = Type32.fromOpcode(opcode);
+        if (optype == null) return null;
+        switch (optype) {
+            case R_TYPE_REG: // R-type of execution
                 if (funct7 == 0x0) {
                     op = switch (funct3) {
                         case 0x0 -> Operand.ADD;
@@ -54,7 +54,7 @@ public class Instruction {
                     };
                 }
                 return new Instruction(op, Type.R_TYPE, rd, funct3, rs1, rs2, funct7, imm);
-            case 0x13: // I-type of execution
+            case I_TYPE_IMM: // I-type of execution
                 imm = (instructionWord >> 20) & 0xfff;
                 op = switch(funct3) {
                     case 0x0 -> Operand.ADDI;
@@ -76,13 +76,13 @@ public class Instruction {
                     };
                 }
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0,  0, imm);
-            case 0x37: // LUI U-type of execution
+            case U_TYPE_LUI: // LUI U-type of execution
                 imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.LUI, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
-            case 0x17: // AUIPC U-type of execution
+            case U_TYPE_AUIPC: // AUIPC U-type of execution
                 imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.AUIPC, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
-            case 0x3: // I-type of memory access
+            case I_TYPE_MEM: // I-type of memory access
                 imm = (instructionWord >> 20) & 0xfff;
                 op = switch(funct3) {
                     case 0x0 -> Operand.LB;
@@ -93,7 +93,7 @@ public class Instruction {
                     default -> null;
                 };
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
-            case 0x23: // S-type of memory access
+            case S_TYPE_MEM: // S-type of memory access
                 int imm11_5b = (instructionWord >> 20) & 0xef;
                 int imm4_0 = (instructionWord >> 7) & 0x1f;
                 imm = (imm11_5b << 5) | imm4_0;
@@ -104,20 +104,20 @@ public class Instruction {
                     default -> null;
                 };
                 return new Instruction(op, Type.S_TYPE, 0, funct3, rs1, rs2, 0, imm);
-            case 0x6f: // J-type of program control
+            case J_TYPE_PROG: // J-type of program control
                 int imm20 = (instructionWord >> 31) & 0x1;
                 int imm10_1 = (instructionWord >> 21) & 0x3ff;
                 int imm11 = (instructionWord >> 20) & 0x1;
                 int imm19_12 = (instructionWord >> 12) & 0xff;
                 imm = (imm20 << 20) | (imm19_12 << 12) | (imm11 << 11) | (imm10_1 << 1);
                 return new Instruction(Operand.JAL, Type.J_TYPE, rd, 0, 0, 0, 0, imm);
-            case 0x67: // I-type of program control
+            case I_TYPE_PROG: // I-type of program control
                 imm = (instructionWord >> 20) & 0xfff;
                 if (funct3 == 0x0) {
                     return new Instruction(Operand.JALR, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
                 }
                 return null;
-            case 0x63: // B-type of program control
+            case B_TYPE_PROG: // B-type of program control
                 int imm12 = (instructionWord >> 31) & 0x1;
                 int imm11_b = (instructionWord >> 7) & 0x1;
                 int imm10_5 = (instructionWord >> 25) & 0x3f;
