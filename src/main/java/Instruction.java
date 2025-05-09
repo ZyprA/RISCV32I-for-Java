@@ -95,7 +95,7 @@ public class Instruction {
                 };
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
             case IType.ST: // S-type of memory access
-                int imm11_5b = (instructionWord >> 20) & 0xef;
+                int imm11_5b = (instructionWord >> 25) & 0x7f;
                 int imm4_0 = (instructionWord >> 7) & 0x1f;
                 imm = (imm11_5b << 5) | imm4_0;
                 imm = signExtend(imm, 12);

@@ -180,12 +180,21 @@ public class Assembler{
     }
 
     private static int BTYPE(int opcode, int funct3, int rs1, int rs2, int imm) {
-        int imm31 = getBitRange(imm, 12, 12);
-        int imm30_25 = getBitRange(imm, 5, 10);
-        int imm11_8 = getBitRange(imm, 1, 4);
-        int imm7 = getBitRange(imm, 11, 11);
-        return (imm31 << 31) | (imm30_25 << 25) | (imm11_8 << 8) | (imm7 << 7) | (rs2 << 20) | (rs1 << 15) |
-                (funct3 << 12) | opcode;
+        // imm must be a signed offset (multiple of 2), typically in range [-4096, 4094]
+
+        int imm12   = (imm >> 12) & 0x1;
+        int imm10_5 = (imm >> 5) & 0x3F;
+        int imm4_1  = (imm >> 1) & 0xF;
+        int imm11   = (imm >> 11) & 0x1;
+
+        return (imm12 << 31) |
+                (imm10_5 << 25) |
+                (rs2 << 20) |
+                (rs1 << 15) |
+                (funct3 << 12) |
+                (imm4_1 << 8) |
+                (imm11 << 7) |
+                opcode;
     }
 
     public static int JTYPE(Operand op, int rd, int imm) {
