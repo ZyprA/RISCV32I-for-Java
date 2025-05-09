@@ -77,10 +77,10 @@ public class Instruction {
                 }
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0,  0, imm);
             case 0x37: // LUI U-type of execution
-                imm = (instructionWord << 12) & 0xfffff;
+                imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.LUI, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
             case 0x17: // AUIPC U-type of execution
-                imm = (instructionWord << 12) & 0xfffff;
+                imm = (instructionWord >> 12) & 0xfffff;
                 return new Instruction(Operand.AUIPC, Type.U_TYPE, rd, 0, 0, 0, 0, imm);
             case 0x3: // I-type of memory access
                 imm = (instructionWord >> 20) & 0xfff;
@@ -94,7 +94,9 @@ public class Instruction {
                 };
                 return new Instruction(op, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
             case 0x23: // S-type of memory access
-                imm = (instructionWord >> 20) & 0x0ef | (instructionWord >> 7) & 0x1f;
+                int imm11_5b = (instructionWord >> 20) & 0xef;
+                int imm4_0 = (instructionWord >> 7) & 0x1f;
+                imm = (imm11_5b << 5) | imm4_0;
                 op = switch(funct3) {
                     case 0x0 -> Operand.SB;
                     case 0x1 -> Operand.SH;
@@ -114,6 +116,7 @@ public class Instruction {
                 if (funct3 == 0x0) {
                     return new Instruction(Operand.JALR, Type.I_TYPE, rd, funct3, rs1, 0, 0, imm);
                 }
+                return null;
             case 0x63: // B-type of program control
                 int imm12 = (instructionWord >> 31) & 0x1;
                 int imm11_b = (instructionWord >> 7) & 0x1;
