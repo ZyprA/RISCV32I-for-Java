@@ -7,7 +7,10 @@ public class Emulator {
     }
 
     public void run() {
-        cpu.execute();
+        boolean stop = false;
+        while (!stop) {
+            stop = cpu.execute();
+        }
         cpu.printRegisters();
     }
 

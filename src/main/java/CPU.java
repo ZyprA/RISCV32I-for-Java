@@ -7,15 +7,16 @@ public class CPU {
         this.memory = memory;
     }
 
-    public void execute() {
+    public boolean execute() {
         Instruction instr = fetchAndDecode();
-        if (instr == null) return;
+        if (instr == null) return true;
 
         int rs1 = registers[instr.rs1];
         int rs2 = registers[instr.rs2];
         int imm = instr.imm;
         int result;
 
+        // debug
         System.out.printf("Executing at PC=0x%08X: %s\n", pc, instr);
 
         switch (instr.op) {
@@ -45,24 +46,24 @@ public class CPU {
             case LH: result = memory.loadHalf(rs1 + imm); break;
             case LHU: result = memory.loadHalf(rs1 + imm) & 0xFFFF; break;
             case LW: result = memory.loadWord(rs1 + imm); break;
-            case SB: memory.storeByte(rs1 + imm, (byte) (rs2 & 0xFF)); return;
-            case SH: memory.storeHalf(rs1 + imm, (byte) (rs2 & 0xFFFF)); return;
-            case SW: memory.storeWord(rs1 + imm, (byte) rs2); return;
+            case SB: memory.storeByte(rs1 + imm, (byte) (rs2 & 0xFF)); return false;
+            case SH: memory.storeHalf(rs1 + imm, (byte) (rs2 & 0xFFFF)); return false;
+            case SW: memory.storeWord(rs1 + imm, (byte) rs2); return false;
             case JAL: setRegister(instr.rd, getPC() + 4); addPC(imm);
-                return;
-            case JALR: setRegister(instr.rd, getPC() + 4); setPC((rs1 + imm) & ~1); return;
-            case BEQ: if (rs1 == rs2) addPC(imm); return;
-            case BNE: if (rs1 != rs2) addPC(imm); return;
-            case BLT: if (rs1 < rs2) addPC(imm); return;
-            case BLTU: if (Integer.compareUnsigned(rs1, rs2) < 0) addPC(imm); return;
-            case BGE: if  (rs1 >= rs2) addPC(imm); return;
-            case BGEU: if (Integer.compareUnsigned(rs1, rs2) >= 0) addPC(imm);return;
+                return false;
+            case JALR: setRegister(instr.rd, getPC() + 4); setPC((rs1 + imm) & ~1); return false;
+            case BEQ: if (rs1 == rs2) addPC(imm); return false;
+            case BNE: if (rs1 != rs2) addPC(imm); return false;
+            case BLT: if (rs1 < rs2) addPC(imm); return false;
+            case BLTU: if (Integer.compareUnsigned(rs1, rs2) < 0) addPC(imm); return false;
+            case BGE: if  (rs1 >= rs2) addPC(imm); return false;
+            case BGEU: if (Integer.compareUnsigned(rs1, rs2) >= 0) addPC(imm);return false;
             default:
                 throw new IllegalArgumentException("Unknown instruction: " + instr.op);
         }
         stepPC();
         setRegister(instr.rd, result);
-        execute();
+        return false;
     }
 
     public void loadProgram(int[] instructions, int baseAddress) {
